@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>أوقات الصلاة العالمية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 20px 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .clock {
+            width: 200px;
+            height: 200px;
+            border: 10px solid #ffffff;
+            border-radius: 50%;
+            margin: 20px auto;
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        }
+
+        .clock-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            background: #fff;
+            border-radius: 5px;
+        }
+
+        .hour {
+            width: 4px;
+            height: 30%;
+            background: #ff9f43;
+        }
+
+        .minute {
+            width: 3px;
+            height: 40%;
+            background: #fff;
+        }
+
+        .second {
+            width: 2px;
+            height: 45%;
+            background: #ff6b6b;
+        }
+
+        .digital-time {
+            font-size: 2em;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .country-select {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        select {
+            padding: 10px 20px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            min-width: 200px;
+        }
+
+        select option {
+            background: #2a5298;
+            color: white;
+        }
+
+        .prayer-times {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .prayer-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s;
+        }
+
+        .prayer-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .prayer-name {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+
+        .prayer-time {
+            font-size: 1.2em;
+        }
+
+        .selected-city {
+            font-size: 1.3em;
+            margin: 20px 0;
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>أوقات الصلاة العالمية</h1>
+        
+        <div class="country-select">
+            <select id="regionSelect">
+                <option value="arab">الدول العربية</option>
+                <option value="europe">الدول الأوروبية</option>
+                <option value="america">الأمريكتين</option>
+            </select>
+            <select id="citySelect"></select>
+        </div>
+
+        <div class="selected-city" id="selectedCity"></div>
+
+        <div class="clock">
+            <div class="clock-center"></div>
+            <div class="hand hour"></div>
+            <div class="hand minute"></div>
+            <div class="hand second"></div>
+        </div>
+
+        <div class="digital-time" id="digitalTime"></div>
+
+        <div class="prayer-times" id="prayerTimes"></div>
+    </div>
+
+    <script>
+        const cities = {
+            arab: {
+‎                "مكة المكرمة": {
+                    fajr: "04:45", sunrise: "06:15", dhuhr: "12:30",
+                    asr: "15:45", maghrib: "18:45", isha: "20:15",
+                    timezone: 3
+                },
+‎                "المدينة المنورة": {
+                    fajr: "04:50", sunrise: "06:20", dhuhr: "12:35",
+                    asr: "15:50", maghrib: "18:50", isha: "20:20",
+                    timezone: 3
+                },
+‎                "القاهرة": {
+                    fajr: "04:00", sunrise: "05:30", dhuhr: "11:45",
+                    asr: "15:00", maghrib: "18:00", isha: "19:30",
+                    timezone: 2
+                },
+‎                "دبي": {
+                    fajr: "05:30", sunrise: "07:00", dhuhr: "13:15",
+                    asr: "16:30", maghrib: "19:30", isha: "21:00",
+                    timezone: 4
+                },
+‎                "بغداد": {
+                    fajr: "04:30", sunrise: "06:00", dhuhr: "12:15",
+                    asr: "15:30", maghrib: "18:30", isha: "20:00",
+                    timezone: 3
+                },
+‎                "دمشق": {
+                    fajr: "04:15", sunrise: "05:45", dhuhr: "12:00",
+                    asr: "15:15", maghrib: "18:15", isha: "19:45",
+                    timezone: 3
+                },
+‎                "عمّان": {
+                    fajr: "04:20", sunrise: "05:50", dhuhr: "12:05",
+                    asr: "15:20", maghrib: "18:20", isha: "19:50",
+                    timezone: 3
+                },
+‎                "الخرطوم": {
+                    fajr: "04:40", sunrise: "06:10", dhuhr: "12:25",
+                    asr: "15:40", maghrib: "18:40", isha: "20:10",
+                    timezone: 2
+                },
+‎                "الرباط": {
+                    fajr: "05:00", sunrise: "06:30", dhuhr: "12:45",
+                    asr: "16:00", maghrib: "19:00", isha: "20:30",
+                    timezone: 1
+                },
+‎                "تونس": {
+                    fajr: "04:35", sunrise: "06:05", dhuhr: "12:20",
+                    asr: "15:35", maghrib: "18:35", isha: "20:05",
+                    timezone: 1
+                }
+            },
+            europe: {
+‎                "لندن": {
+                    fajr: "03:30", sunrise: "05:00", dhuhr: "11:15",
+                    asr: "14:30", maghrib: "17:30", isha: "19:00",
+                    timezone: 1
+                },
+‎                "باريس": {
+                    fajr: "03:45", sunrise: "05:15", dhuhr: "11:30",
+                    asr: "14:45", maghrib: "17:45", isha: "19:15",
+                    timezone: 2
+                },
+‎                "برلين": {
+                    fajr: "03:15", sunrise: "04:45", dhuhr: "11:00",
+                    asr: "14:15", maghrib: "17:15", isha: "18:45",
+                    timezone: 2
+                },
+‎                "روما": {
+                    fajr: "04:00", sunrise: "05:30", dhuhr: "11:45",
+                    asr: "15:00", maghrib: "18:00", isha: "19:30",
+                    timezone: 2
+                },
+‎                "مدريد": {
+                    fajr: "04:15", sunrise: "05:45", dhuhr: "12:00",
+                    asr: "15:15", maghrib: "18:15", isha: "19:45",
+                    timezone: 2
+                },
+‎                "أمستردام": {
+                    fajr: "03:30", sunrise: "05:00", dhuhr: "11:15",
+                    asr: "14:30", maghrib: "17:30", isha: "19:00",
+                    timezone: 2
+                }
+            },
+            america: {
+‎                "نيويورك": {
+                    fajr: "04:30", sunrise: "06:00", dhuhr: "12:15",
+                    asr: "15:30", maghrib: "18:30", isha: "20:00",
+                    timezone: -4
+                },
+‎                "لوس أنجلوس": {
+                    fajr: "04:45", sunrise: "06:15", dhuhr: "12:30",
+                    asr: "15:45", maghrib: "18:45", isha: "20:15",
+                    timezone: -7
+                },
+‎                "شيكاغو": {
+                    fajr: "04:15", sunrise: "05:45", dhuhr: "12:00",
+                    asr: "15:15", maghrib: "18:15", isha: "19:45",
+                    timezone: -5
+                },
+‎                "تورونتو": {
+                    fajr: "04:00", sunrise: "05:30", dhuhr: "11:45",
+                    asr: "15:00", maghrib: "18:00", isha: "19:30",
+                    timezone: -4
+                },
+‎                "مكسيكو سيتي": {
+                    fajr: "05:00", sunrise: "06:30", dhuhr: "12:45",
+                    asr: "16:00", maghrib: "19:00", isha: "20:30",
+                    timezone: -5
+                },
+‎                "ساو باولو": {
+                    fajr: "05:15", sunrise: "06:45", dhuhr: "13:00",
+                    asr: "16:15", maghrib: "19:15", isha: "20:45",
+                    timezone: -3
+                }
+            }
+        };
+
+        const prayerNamesArabic = {
+            fajr: "الفجر",
+            sunrise: "الشروق",
+            dhuhr: "الظهر",
+            asr: "العصر",
+            maghrib: "المغرب",
+            isha: "العشاء"
+        };
+
+        function updateCitySelect(region) {
+            const citySelect = document.getElementById('citySelect');
+            citySelect.innerHTML = '';
+            
+            Object.keys(cities[region]).forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+            
+            updatePrayerTimes();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const region = document.getElementById('regionSelect').value;
+            const city = document.getElementById('citySelect').value;
+            const timezone = cities[region][city].timezone;
+            
+‎            // تعديل الوقت حسب المنطقة الزمنية
+            const localTime = new Date(now.getTime() + (timezone * 60 + now.getTimezoneOffset()) * 60000);
+            
+            const hours = localTime.getHours();
+            const minutes = localTime.getMinutes();
+            const seconds = localTime.getSeconds();
+
+            document.getElementById('digitalTime').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            const hourDeg = (hours % 12 + minutes / 60) * 30;
+            const minuteDeg = minutes * 6;
+            const secondDeg = seconds * 6;
+
+            document.querySelector('.hour').style.transform = `rotate(${hourDeg}deg)`;
+            document.querySelector('.minute').style.transform = `rotate(${minuteDeg}deg)`;
+            document.querySelector('.second').style.transform = `rotate(${secondDeg}deg)`;
+        }
+
+        function updatePrayerTimes() {
+            const region = document.getElementById('regionSelect').value;
+            const city = document.getElementById('citySelect').value;
+            const times = cities[region][city];
+            const prayerTimesContainer = document.getElementById('prayerTimes');
+            document.getElementById('selectedCity').textContent = `التوقيت المحلي: ${city}`;
+            
+            prayerTimesContainer.innerHTML = '';
+
+            for (const prayer in prayerNamesArabic) {
+                if (times[prayer]) {
+                    const card = document.createElement('div');
+                    card.className = 'prayer-card';
+                    card.innerHTML = `
+                        <div class="prayer-name">${prayerNamesArabic[prayer]}</div>
+                        <div class="prayer-time">${times[prayer]}</div>
+                    `;
+                    prayerTimesContainer.appendChild(card);
+                }
+            }
+        }
+
+        document.getElementById('regionSelect').addEventListener('change', (e) => {
+            updateCitySelect(e.target.value);
+        });
+
+        document.getElementById('citySelect').addEventListener('change', updatePrayerTimes);
+
+‎        // التحديث الأولي
+        updateCitySelect('arab');
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>
